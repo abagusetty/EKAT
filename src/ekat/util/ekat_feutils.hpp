@@ -8,6 +8,9 @@
 #ifndef EKAT_HAVE_FEENABLEEXCEPT
 
 namespace ekat {
+
+#ifdef APPLE
+
 inline int
 fegetexcept (void)
 {
@@ -49,6 +52,29 @@ fedisableexcept (int excepts)
 
   return ( fesetenv (&fenv) ? -1 : old_excepts );
 }
+
+#else // unsupported machine.
+
+inline int
+fegetexcept (void)
+{
+  fprintf(stderr, "fegetexcept: unsupported environment (no effect)\n");
+  return 0;
+}
+
+inline int
+feenableexcept (int excepts)
+{
+  fprintf(stderr, "feenableexcept: unsupported environment (no effect)\n");
+}
+
+inline int
+fedisableexcept (int excepts)
+{
+  fprintf(stderr, "fedisableexcept: unsupported environment (no effect)\n");
+}
+
+#endif
 
 } // namespace ekat
 #endif // EKAT_NEEDS_FEENABLEEXCEPT
