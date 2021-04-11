@@ -13,7 +13,11 @@ fegetexcept (void)
 {
   static fenv_t fenv;
 
+#ifndef __aarch64__ // for ARM64 Macs
   return fegetenv (&fenv) ? -1 : (fenv.__control & FE_ALL_EXCEPT);
+#else
+  return 0;
+#endif
 }
 
 inline int
@@ -24,11 +28,15 @@ feenableexcept (int excepts)
                old_excepts;  // previous masks
 
   if ( fegetenv (&fenv) ) return -1;
+#ifndef __aarch64__ // for ARM64 Macs
   old_excepts = fenv.__control & FE_ALL_EXCEPT;
 
   // unmask
   fenv.__control &= ~new_excepts;
   fenv.__mxcsr   &= ~(new_excepts << 7);
+#else
+  old_excepts = new_excepts;
+#endif
 
   return ( fesetenv (&fenv) ? -1 : old_excepts );
 }
@@ -41,16 +49,20 @@ fedisableexcept (int excepts)
                old_excepts;  // all previous masks
 
   if ( fegetenv (&fenv) ) return -1;
+#ifndef __aarch64__ // for ARM64 Macs
   old_excepts = fenv.__control & FE_ALL_EXCEPT;
 
   // mask
   fenv.__control |= new_excepts;
   fenv.__mxcsr   |= new_excepts << 7;
+#else
+  old_excepts = new_excepts;
+#endif
 
   return ( fesetenv (&fenv) ? -1 : old_excepts );
 }
 
 } // namespace ekat
-#endif // EKAT_NEEDS_FEENABLEEXCEPT
+#endif // __aarch64__
 
 #endif // EKAT_FEUTILS_HPP
