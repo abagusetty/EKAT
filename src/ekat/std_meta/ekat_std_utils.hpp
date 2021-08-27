@@ -3,11 +3,27 @@
 
 #include <algorithm>
 #include <memory>
+#include <type_traits>
 #include <vector>
 #include <string>
 #include <set>
 
 namespace ekat {
+
+template<typename T, typename...Ts>
+struct SameTypeImpl : std::true_type {};
+template<typename T, typename H, typename...Ts>
+struct SameTypeImpl<T,H,Ts...> :
+  std::conditional<std::is_same<T,H>::value,
+                   std::true_type,
+                   SameTypeImpl<T,Ts...>
+                  >::type {};
+
+template<typename T, typename...Ts>
+struct SameType : SameTypeImpl<T,Ts...> {
+  // Also expose the common type.
+  using type = T;
+};
 
 // This function returns an iterator which is of the same type of c.begin()
 template<typename ContainerType, typename T>
